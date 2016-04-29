@@ -1,7 +1,8 @@
 """
  harvest.py
 
- Author: Jonathan Hosmer (forked from https://github.com/lionheart/python-harvest.git)
+ Author: Jonathan Hosmer
+ (forked from https://github.com/lionheart/python-harvest.git)
  Date: Sat Jan 31 12:17:16 2015
 
 """
@@ -10,7 +11,7 @@ import json
 import requests
 from requests_oauthlib import OAuth2Session
 from urlparse import urlparse
-from base64   import b64encode as enc64
+from base64 import b64encode as enc64
 
 HARVEST_STATUS_URL = 'http://www.harveststatus.com/api/v2/status.json'
 
@@ -27,19 +28,20 @@ class Harvest(object):
             raise HarvestError('Invalid harvest uri "{0}".'.format(uri))
 
         self.__headers = {
-            'Content-Type'  : 'application/json',
-            'Accept'        : 'application/json',
-            'User-Agent'    : 'Mozilla/5.0',  # 'TimeTracker for Linux' -- ++ << >>
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0',  # 'TimeTracker for Linux' -- ++ << >>
         }
         if email and password:
-            self.__auth     = 'Basic'
-            self.__email    = email.strip()
+            self.__auth = 'Basic'
+            self.__email = email.strip()
             self.__password = password
             if put_auth_in_header:
-                self.__headers['Authorization'] = 'Basic {0}'.format(enc64('{self.email}:{self.password}'.format(self=self)))
+                basic_auth = enc64('{self.email}:{self.password}'.format(self=self))
+                self.__headers['Authorization'] = 'Basic {0}'.format(basic_auth)
         elif client_id and token:
-            self.__auth         = 'OAuth2'
-            self.__client_id    = client_id
+            self.__auth = 'OAuth2'
+            self.__client_id = client_id
             self.__token = token
 
     @property
@@ -70,13 +72,13 @@ class Harvest(object):
     def status(self):
         return status()
 
-    ## Accounts
+    # Accounts
 
     @property
     def who_am_i(self):
         return self._get('/account/who_am_i')
 
-    ## Client Contacts
+    # Client Contacts
 
     def contacts(self, updated_since=None):
         url = '/contacts'
@@ -88,8 +90,8 @@ class Harvest(object):
         return self._get('/contacts/{0}'.format(contact_id))
 
     def create_contact(self, new_contact_id, fname, lname, **kwargs):
-        url  = '/contacts/{0}'.format(new_contact_id)
-        kwargs.update({'first-name':fname, 'last-name':lname})
+        url = '/contacts/{0}'.format(new_contact_id)
+        kwargs.update({'first-name': fname, 'last-name': lname})
         return self._post(url, data=kwargs)
 
     def client_contacts(self, client_id, updated_since=None):
@@ -105,7 +107,7 @@ class Harvest(object):
     def delete_contact(self, contact_id):
         return self._delete('/contacts/{0}'.format(contact_id))
 
-    ## Clients
+    # Clients
 
     def clients(self, updated_since=None):
         url = '/clients'
@@ -131,8 +133,7 @@ class Harvest(object):
     def delete_client(self, client_id):
         return self._delete('/clients/{0}'.format(client_id))
 
-
-     ## People
+    # People
 
     def people(self):
         url = '/people'
@@ -147,7 +148,7 @@ class Harvest(object):
     def delete_person(self, client_id):
         return self._delete('/people/{0}'.format(person_id))
 
-    ## Projects
+    # Projects
 
     def projects(self, client=None):
         if client:
@@ -185,7 +186,7 @@ class Harvest(object):
     def delete_project(self, project_id):
         return self._delete('/projects/{0}'.format(project_id))
 
-    ## Tasks
+    # Tasks
 
     def tasks(self, updated_since=None):
         # /tasks?updated_since=2010-09-25+18%3A30
@@ -217,7 +218,7 @@ class Harvest(object):
         # ACTIVATE EXISTING ARCHIVED TASK
         return self._post('/tasks/{0}/activate'.format(tasks_id))
 
-    ## Task Assignment: Assigning tasks to projects
+    # Task Assignment: Assigning tasks to projects
 
     def get_all_tasks_from_project(self, project_id):
         # GET ALL TASKS ASSIGNED TO A GIVEN PROJECT
@@ -250,14 +251,14 @@ class Harvest(object):
         kwargs.update({'task-assignment': data})
         return self._put('/projects/{0}/task_assignments/{1}'.format(project_id, task_id), kwargs)
 
-    ## User Assignment: Assigning users to projects
+    # User Assignment: Assigning users to projects
 
     def assign_user_to_project(self, project_id, user_id):
         # ASSIGN A USER TO A PROJECT
         # POST /projects/#{project_id}/user_assignments
         return self._post('/projects/{0}/user_assignments'.format(project_id), {"user": {"id": user_id}})
 
-    ## Expense Categories
+    # Expense Categories
 
     @property
     def expense_categories(self):
@@ -278,7 +279,7 @@ class Harvest(object):
     def toggle_expense_category_active(self, expense_category_id):
         return self._get('/expense_categories/{0}/toggle'.format(expense_category_id))
 
-    ## Time Tracking
+    # Time Tracking
 
     @property
     def today(self):
@@ -305,7 +306,7 @@ class Harvest(object):
     def update(self, entry_id, data):
         return self._post('/daily/update/{0}'.format(entry_id), data)
 
-    ## Invoices
+    # Invoices
 
     def invoices(self, start_date=None, end_date=None, updated_since=None, client_id=None, status=None):
         if client_id:
@@ -344,7 +345,7 @@ class Harvest(object):
         """
         return self._post('/invoices/{0}'.format(invoice_id), data)
 
-    ## Internal methods
+    # Internal methods
     def _get(self, path='/', data=None):
         return self._request('GET', path, data)
 
@@ -360,10 +361,10 @@ class Harvest(object):
     def _request(self, method='GET', path='/', data=None):
         url = '{self.uri}{path}'.format(self=self, path=path)
         kwargs = {
-            'method'  : method,
-            'url'     : '{self.uri}{path}'.format(self=self, path=path),
-            'headers' : self.__headers,
-            'data'   : json.dumps(data),
+            'method': method,
+            'url': '{self.uri}{path}'.format(self=self, path=path),
+            'headers': self.__headers,
+            'data': json.dumps(data),
         }
         if self.auth == 'Basic':
             requestor = requests
