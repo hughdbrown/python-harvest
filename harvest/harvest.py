@@ -20,6 +20,7 @@ HARVEST_STATUS_URL = 'http://www.harveststatus.com/api/v2/status.json'
 # pylint: disable=bare-except
 # pylint: disable=too-many-public-methods
 
+
 class HarvestError(Exception):
     """ Custom class for Harvest exceptions """
     pass
