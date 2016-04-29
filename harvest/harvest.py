@@ -305,6 +305,46 @@ class Harvest(object):
     def update(self, entry_id, data):
         return self._post('/daily/update/{0}'.format(entry_id), data)
 
+    ## Invoices
+
+    def invoices(self, start_date=None, end_date=None, updated_since=None, client_id=None, status=None):
+        if client_id:
+            params = '?client={0}'.format(client_id)
+        elif start_date or end_date:
+            params = '?from={0}&to={1}'.format(start_date, end_date)
+        elif status:
+            params = '?status={0}'.format(status)
+        elif updated_since:
+            params = '?updated_since={0}'.format(updated_since)
+        else:
+            params = ""
+        return self._get('/invoices{0}'.format(params))
+
+    def get_invoice(self, invoice_id):
+        """
+        Get an invoice by `invoice_id`
+        """
+        return self._get('/invoices/{0}'.format(invoice_id))
+
+    def delete_invoice(self, invoice_id):
+        """
+        Delete an existing invoice by `invoice_id`
+        """
+        return self._delete('/invoices/{0}'.format(invoice_id))
+
+    def update_invoice(self, invoice_id, data):
+        """
+        Update an existing invoice by `invoice_id`
+        """
+        return self._put('/invoices/{0}'.format(invoice_id), data)
+
+    def add_invoice(self, data):
+        """
+        Create a new invoice
+        """
+        return self._post('/invoices/{0}'.format(invoice_id), data)
+
+    ## Internal methods
     def _get(self, path='/', data=None):
         return self._request('GET', path, data)
 
