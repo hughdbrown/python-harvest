@@ -343,7 +343,7 @@ class Harvest(object):
         """
         Create a new invoice
         """
-        return self._post('/invoices/{0}'.format(invoice_id), data)
+        return self._post('/invoices/', data)
 
     # Internal methods
     def _get(self, path='/', data=None):
