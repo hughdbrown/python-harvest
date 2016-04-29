@@ -4,7 +4,6 @@
  Author: Jonathan Hosmer
  (forked from https://github.com/lionheart/python-harvest.git)
  Date: Sat Jan 31 12:17:16 2015
-
 """
 
 import json
@@ -112,7 +111,8 @@ class Harvest(object):
         """
         Get a contact by contact_id
         """
-        return self._get('/contacts/{0}'.format(contact_id))
+        url = '/contacts/{0}'.format(contact_id)
+        return self._get(url)
 
     def create_contact(self, new_contact_id, fname, lname, **kwargs):
         """
@@ -142,13 +142,14 @@ class Harvest(object):
         """
         Delete a contact
         """
-        return self._delete('/contacts/{0}'.format(contact_id))
+        url = '/contacts/{0}'.format(contact_id)
+        return self._delete(url)
 
     # Clients
 
     def clients(self, updated_since=None):
         """
-        Get clinets (optinally update since a date)
+        Get clinets (optionally update since a date)
         """
         url = '/clients'
         if updated_since is not None:
@@ -164,9 +165,9 @@ class Harvest(object):
     def create_client(self, **kwargs):
         """
         Create a new client
+        client.create_client(client={"name":"jo"})
         """
         url = '/clients/'
-        # client.create_client(client={"name":"jo"})
         return self._post(url, data=kwargs)
 
     def update_client(self, client_id, **kwargs):
@@ -180,13 +181,15 @@ class Harvest(object):
         """
         Toggle the active flag of a client
         """
-        return self._post('/clients/{0}/toggle'.format(client_id))
+        url = '/clients/{0}/toggle'.format(client_id)
+        return self._post(url)
 
     def delete_client(self, client_id):
         """
         Delete a client
         """
-        return self._delete('/clients/{0}'.format(client_id))
+        url = '/clients/{0}'.format(client_id)
+        return self._delete(url)
 
     # People
 
@@ -201,58 +204,64 @@ class Harvest(object):
         """
         Get a particular person by person_id
         """
-        return self._get('/people/{0}'.format(person_id))
+        url = '/people/{0}'.format(person_id)
+        return self._get(url)
 
     def toggle_person_active(self, person_id):
         """
-        Toggle the activie flag of a person
+        Toggle the active flag of a person
         """
-        return self._get('/people/{0}/toggle'.format(person_id))
+        url = '/people/{0}/toggle'.format(person_id)
+        return self._get(url)
 
     def delete_person(self, person_id):
         """
         Delete a person
         """
-        return self._delete('/people/{0}'.format(person_id))
+        url = '/people/{0}'.format(person_id)
+        return self._delete(url)
 
     # Projects
 
     def projects(self, client=None):
         """
-        Get all teh projects (optinally restricted to a particular client)
+        Get all the projects (optinally restricted to a particular client)
         """
         if client:
             # You can filter by client_id and updated_since.
             # For example to show only the projects belonging to client with the id 23445.
             # GET /projects?client=23445
-            return self._get('/projects?client={0}'.format(client))
+            url = '/projects?client={0}'.format(client)
+            return self._get(url)
         return self._get('/projects')
 
     def projects_for_client(self, client_id):
         """
         Get the projects for a particular client
         """
-        return self._get('/projects?client={}'.format(client_id))
+        url = '/projects?client={}'.format(client_id)
+        return self._get(url)
 
     def timesheets_for_project(self, project_id, start_date, end_date):
         """
         Get the timesheets for a project
         """
-        return self._get('/projects/{0}/entries?from={1}&to={2}'
-                         .format(project_id, start_date, end_date))
+        url = '/projects/{0}/entries?from={1}&to={2}'.format(project_id, start_date, end_date)
+        return self._get(url)
 
     def expenses_for_project(self, project_id, start_date, end_date):
         """
-        Get teh expenses for a project between a start date and end date
+        Get the expenses for a project between a start date and end date
         """
-        return self._get('/projects/{0}/expenses?from={1}&to={2}'
-                         .format(project_id, start_date, end_date))
+        url = '/projects/{0}/expenses?from={1}&to={2}'.format(project_id, start_date, end_date)
+        return self._get(url)
 
     def get_project(self, project_id):
         """
         Get a particular project
         """
-        return self._get('/projects/{0}'.format(project_id))
+        url = '/projects/{0}'.format(project_id)
+        return self._get(url)
 
     def create_project(self, **kwargs):
         """
@@ -278,7 +287,8 @@ class Harvest(object):
         """
         Delete a project
         """
-        return self._delete('/projects/{0}'.format(project_id))
+        url = '/projects/{0}'.format(project_id)
+        return self._delete(url)
 
     # Tasks
 
@@ -288,14 +298,16 @@ class Harvest(object):
         /tasks?updated_since=2010-09-25+18%3A30
         """
         if updated_since:
-            return self._get('/tasks?updated_since={0}'.format(updated_since))
+            url = '/tasks?updated_since={0}'.format(updated_since)
+            return self._get(url)
         return self._get('/tasks')
 
     def get_task(self, task_id):
         """
         Get a particular task by task_id
         """
-        return self._get('/tasks/{0}'.format(task_id))
+        url = '/tasks/{0}'.format(task_id)
+        return self._get(url)
 
     def create_task(self, **kwargs):
         """
@@ -318,13 +330,15 @@ class Harvest(object):
         Returned if task does not have any hours associated - task will be deleted.
         Returned if task is not removable - task will be archived.
         """
-        return self._delete('/tasks/{0}'.format(tasks_id))
+        url = '/tasks/{0}'.format(tasks_id)
+        return self._delete(url)
 
     def activate_task(self, tasks_id):
         """
         ACTIVATE EXISTING ARCHIVED TASK
         """
-        return self._post('/tasks/{0}/activate'.format(tasks_id))
+        url = '/tasks/{0}/activate'.format(tasks_id)
+        return self._post(url)
 
     # Task Assignment: Assigning tasks to projects
 
@@ -333,7 +347,8 @@ class Harvest(object):
         GET ALL TASKS ASSIGNED TO A GIVEN PROJECT
         /projects/#{project_id}/task_assignments
         """
-        return self._get('/projects/{0}/task_assignments'.format(project_id))
+        url = '/projects/{0}/task_assignments'.format(project_id)
+        return self._get(url)
 
     def get_one_task_assigment(self, project_id, task_id):
         """
@@ -512,25 +527,28 @@ class Harvest(object):
         """
         Get an invoice by `invoice_id`
         """
-        return self._get('/invoices/{0}'.format(invoice_id))
+        url = '/invoices/{0}'.format(invoice_id)
+        return self._get(url)
 
     def delete_invoice(self, invoice_id):
         """
         Delete an existing invoice by `invoice_id`
         """
-        return self._delete('/invoices/{0}'.format(invoice_id))
+        url = '/invoices/{0}'.format(invoice_id)
+        return self._delete(url)
 
     def update_invoice(self, invoice_id, data):
         """
         Update an existing invoice by `invoice_id`
         """
-        return self._put('/invoices/{0}'.format(invoice_id), data)
+        url = '/invoices/{0}'.format(invoice_id)
+        return self._put(url, data)
 
     def add_invoice(self, data):
         """
         Create a new invoice
         """
-        return self._post('/invoices/', data)
+        return self._post('/invoices', data)
 
     # Internal methods
     def _get(self, path='/', data=None):
