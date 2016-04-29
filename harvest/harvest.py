@@ -360,7 +360,6 @@ class Harvest(object):
         return self._request('DELETE', path, data)
 
     def _request(self, method='GET', path='/', data=None):
-        url = '{self.uri}{path}'.format(self=self, path=path)
         kwargs = {
             'method': method,
             'url': '{self.uri}{path}'.format(self=self, path=path),
