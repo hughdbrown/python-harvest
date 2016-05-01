@@ -418,7 +418,7 @@ class Harvest(object):
 
     def update_expense_category(self, expense_category_id, **kwargs):
         """
-        Uodate an existing expense category
+        Update an existing expense category
         """
         url = '/expense_categories/{0}'.format(expense_category_id)
         return self._put(url, data=kwargs)
@@ -510,6 +510,7 @@ class Harvest(object):
         - client_id
         - status
         - updated since date
+        http://help.getharvest.com/api/invoices-api/invoices/show-invoices/#show-recently-created-invoices
         """
         if client_id:
             params = '?client={0}'.format(client_id)
@@ -526,6 +527,7 @@ class Harvest(object):
     def get_invoice(self, invoice_id):
         """
         Get an invoice by `invoice_id`
+        http://help.getharvest.com/api/invoices-api/invoices/show-invoices/#show-a-single-invoice
         """
         url = '/invoices/{0}'.format(invoice_id)
         return self._get(url)
@@ -533,6 +535,7 @@ class Harvest(object):
     def delete_invoice(self, invoice_id):
         """
         Delete an existing invoice by `invoice_id`
+        http://help.getharvest.com/api/invoices-api/invoices/show-invoices/#delete-existing-invoice
         """
         url = '/invoices/{0}'.format(invoice_id)
         return self._delete(url)
@@ -540,6 +543,7 @@ class Harvest(object):
     def update_invoice(self, invoice_id, data):
         """
         Update an existing invoice by `invoice_id`
+        http://help.getharvest.com/api/invoices-api/invoices/show-invoices/#update-existing-invoice
         """
         url = '/invoices/{0}'.format(invoice_id)
         return self._put(url, data)
@@ -547,6 +551,7 @@ class Harvest(object):
     def add_invoice(self, data):
         """
         Create a new invoice
+        http://help.getharvest.com/api/invoices-api/invoices/create-an-invoice/
         """
         return self._post('/invoices', data)
 
