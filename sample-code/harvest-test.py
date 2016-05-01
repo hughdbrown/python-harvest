@@ -102,6 +102,7 @@ def json_to_csv():
         # Read the JSON
         with open(json_filename, "r") as handle:
             data = simplejson.loads(handle.read())
+        print("{0} JSON records".format(len(data)), file=sys.stderr)
 
         # Write the CSV
         with open(csv_filename, "w") as handle:
@@ -116,11 +117,13 @@ def json_to_csv():
                 dw = DictWriter(handle, fieldnames=fields, quoting=QUOTE_ALL)
                 dw.writeheader()
 
-                for i, row in enumerate(data):
+                i = 0
+                for row in data:
                     d0 = row[key]
                     d = {field: d0.get(field) for field in fields}
                     dw.writerow(d)
-                print("{0} rows".format(i), file=sys.stderr)
+                    i += 1
+                print("{0} CSV rows".format(i), file=sys.stderr)
             except IndexError:
                 # No rows in JSON
                 print("No data in '{0}'".format(json_filename), file=sys.stderr)
