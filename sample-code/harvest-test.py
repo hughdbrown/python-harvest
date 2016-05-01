@@ -58,72 +58,69 @@ def main(client):
         with open(filename, "w") as handle:
             handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
 
-    # Projects
-    ALL_2016 = {"start_date": "2016-01-01", "end_date": "2016-12-31"}
-    mapping_projects = [
-        # expenses_for_project(self, project_id, start_date, end_date
-        ("expenses_for_project.json", client.expenses_for_project, ALL_2016),
-
-        # get_all_tasks_from_project(self, project_id)
-        ("tasks_for_project.json", client.get_all_tasks_from_project, {}),
-
-        # timesheets_for_project(self, project_id, start_date, end_date)
-        ("timesheets_for_project.json", client.timesheets_for_project, ALL_2016),
-    ]
     with open("projects.json", "r") as handle:
         projects = simplejson.loads(handle.read())
         project_ids = [d["project"]["id"] for d in projects]
 
-    for filename, fn, kwargs in mapping_projects:
-        print(filename, file=sys.stderr)
-        json = []
-        for project_id in project_ids:
-            print("\t", project_id, file=sys.stderr)
-            d = fn(project_id, **kwargs)
-            if d:
-                json += d
-        with open(filename, "w") as handle:
-            handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
-
-    # Clients
-    mapping_clients = [
-        # projects_for_client(self, client_id)
-        ("projects_for_client.json", client.projects_for_client, {}),
-    ]
     with open("clients.json", "r") as handle:
         clients = simplejson.loads(handle.read())
         client_ids = [d["client"]["id"] for d in clients]
 
-    for filename, fn, kwargs in mapping_clients:
+    # Projects and clients (APIs that take IDs as arguments)
+    ALL_2016 = {"start_date": "2016-01-01", "end_date": "2016-12-31"}
+    mapping_ids = [
+        # expenses_for_project(self, project_id, start_date, end_date
+        ("expenses_for_project.json", client.expenses_for_project, ALL_2016, project_ids),
+
+        # get_all_tasks_from_project(self, project_id)
+        ("tasks_for_project.json", client.get_all_tasks_from_project, {}, project_ids),
+
+        # timesheets_for_project(self, project_id, start_date, end_date)
+        ("timesheets_for_project.json", client.timesheets_for_project, ALL_2016, project_ids),
+
+        # projects_for_client(self, client_id)
+        ("projects_for_client.json", client.projects_for_client, {}, client_ids),
+    ]
+
+    for filename, fn, kwargs, ids in mapping_ids:
         print(filename, file=sys.stderr)
         json = []
-        for client_id in client_ids:
-            print("\t", client_id, file=sys.stderr)
-            d = fn(client_id, **kwargs)
+        for id in ids:
+            print("\t", id, file=sys.stderr)
+            d = fn(id, **kwargs)
             if d:
                 json += d
         with open(filename, "w") as handle:
             handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
 
+
 def json_to_csv():
     for json_filename in glob("*.json"):
-        print("-" * 30)
-        print(json_filename)
         csv_filename = os.path.splitext(json_filename)[0] + ".csv"
-        print(csv_filename)
+        print("{0} {1} -> {2}".format("-" * 30, json_filename, csv_filename), file=sys.stderr)
+
+        # Read the JSON
         with open(json_filename, "r") as handle:
             data = simplejson.loads(handle.read())
+
+        # Write the CSV
         with open(csv_filename, "w") as handle:
             try:
+                # Get the first item in the list of dicts,
+                # get the first key (the only key)
                 d1 = data[0]
                 key = d1.keys()[0]
+
+                # Sort the keys in the dict: they will be the headers for the CSV
                 fields = sorted(d1[key].keys())
                 dw = DictWriter(handle, fieldnames=fields, quoting=QUOTE_ALL)
                 dw.writeheader()
-                for row in data:
+
+                for i, row in enumerate(data):
                     d0 = row[key]
-                    d = {field: d0[field] for field in fields}
+                    d = {field: d0.get(field) for field in fields}
                     dw.writerow(d)
+                print("{0} rows".format(i), file=sys.stderr)
             except IndexError:
                 # No rows in JSON
                 print("No data in '{0}'".format(json_filename), file=sys.stderr)
