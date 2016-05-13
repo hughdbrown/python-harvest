@@ -93,14 +93,18 @@ class Harvest(object):
 
     @property
     def who_am_i(self):
-        """ who_am_i property """
+        """
+        who_am_i property
+        http://help.getharvest.com/api/introduction/overview/who-am-i/
+        """
         return self._get('/account/who_am_i')
 
     # Client Contacts
 
     def contacts(self, updated_since=None):
         """
-        Get list of contacts (optionally since a given date)
+        Get list of all contacts (optionally since a given date)
+        http://help.getharvest.com/api/clients-api/clients/using-the-client-contacts-api/
         """
         url = '/contacts'
         if updated_since is not None:
@@ -109,7 +113,8 @@ class Harvest(object):
 
     def get_contact(self, contact_id):
         """
-        Get a contact by contact_id
+        Get a single contact by contact_id
+        http://help.getharvest.com/api/clients-api/clients/using-the-client-contacts-api/#get-a-client-contact
         """
         url = '/contacts/{0}'.format(contact_id)
         return self._get(url)
@@ -117,6 +122,7 @@ class Harvest(object):
     def create_contact(self, new_contact_id, fname, lname, **kwargs):
         """
         Create a new contact
+        http://help.getharvest.com/api/clients-api/clients/using-the-client-contacts-api/#create-a-new-client-contact
         """
         url = '/contacts/{0}'.format(new_contact_id)
         kwargs.update({'first-name': fname, 'last-name': lname})
@@ -124,7 +130,8 @@ class Harvest(object):
 
     def client_contacts(self, client_id, updated_since=None):
         """
-        Get a client from a client_id (optionally specifing anupdated_since data)
+        Get all contacts for a client by client_id (optionally specifing anupdated_since data)
+        http://help.getharvest.com/api/clients-api/clients/using-the-client-contacts-api/#get-all-contacts-for-a-client
         """
         url = '/clients/{0}/contacts'.format(client_id)
         if updated_since is not None:
@@ -134,6 +141,7 @@ class Harvest(object):
     def update_contact(self, contact_id, **kwargs):
         """
         Update a contact
+        http://help.getharvest.com/api/clients-api/clients/using-the-client-contacts-api/#update-a-client-contact
         """
         url = '/contacts/{0}'.format(contact_id)
         return self._put(url, data=kwargs)
@@ -141,6 +149,7 @@ class Harvest(object):
     def delete_contact(self, contact_id):
         """
         Delete a contact
+        http://help.getharvest.com/api/clients-api/clients/using-the-client-contacts-api/#delete-a-client-contact
         """
         url = '/contacts/{0}'.format(contact_id)
         return self._delete(url)
@@ -149,7 +158,8 @@ class Harvest(object):
 
     def clients(self, updated_since=None):
         """
-        Get clinets (optionally update since a date)
+        Get clients (optionally update since a date)
+        http://help.getharvest.com/api/clients-api/clients/using-the-clients-api/#get-all-clients
         """
         url = '/clients'
         if updated_since is not None:
@@ -158,7 +168,8 @@ class Harvest(object):
 
     def get_client(self, client_id):
         """
-        Get a client by client_id
+        Get a single client by client_id
+        http://help.getharvest.com/api/clients-api/clients/using-the-clients-api/#get-a-single-client
         """
         return self._get('/clients/{0}'.format(client_id))
 
@@ -166,6 +177,7 @@ class Harvest(object):
         """
         Create a new client
         client.create_client(client={"name":"jo"})
+        http://help.getharvest.com/api/clients-api/clients/using-the-clients-api/#create-a-new-client
         """
         url = '/clients/'
         return self._post(url, data=kwargs)
@@ -173,6 +185,7 @@ class Harvest(object):
     def update_client(self, client_id, **kwargs):
         """
         Update a client
+        http://help.getharvest.com/api/clients-api/clients/using-the-clients-api/#update-a-client
         """
         url = '/clients/{0}'.format(client_id)
         return self._put(url, data=kwargs)
@@ -180,6 +193,7 @@ class Harvest(object):
     def toggle_client_active(self, client_id):
         """
         Toggle the active flag of a client
+        http://help.getharvest.com/api/clients-api/clients/using-the-clients-api/#activate-or-deactivate-an-existing-client
         """
         url = '/clients/{0}/toggle'.format(client_id)
         return self._post(url)
@@ -187,6 +201,7 @@ class Harvest(object):
     def delete_client(self, client_id):
         """
         Delete a client
+        http://help.getharvest.com/api/clients-api/clients/using-the-clients-api/#delete-a-client
         """
         url = '/clients/{0}'.format(client_id)
         return self._delete(url)
@@ -196,6 +211,7 @@ class Harvest(object):
     def people(self):
         """
         Get all the people
+        http://help.getharvest.com/api/users-api/users/managing-users/
         """
         url = '/people'
         return self._get(url)
@@ -210,6 +226,7 @@ class Harvest(object):
     def toggle_person_active(self, person_id):
         """
         Toggle the active flag of a person
+        http://help.getharvest.com/api/users-api/users/managing-users/#toggle-an-existing-user
         """
         url = '/people/{0}/toggle'.format(person_id)
         return self._get(url)
@@ -217,6 +234,7 @@ class Harvest(object):
     def delete_person(self, person_id):
         """
         Delete a person
+        http://help.getharvest.com/api/users-api/users/managing-users/#delete-a-user
         """
         url = '/people/{0}'.format(person_id)
         return self._delete(url)
