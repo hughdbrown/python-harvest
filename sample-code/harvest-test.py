@@ -22,6 +22,7 @@ def get_credentials():
 
 
 def get_client():
+    print("get_credentials", file=sys.stderr)
     credentials = get_credentials()
     app, email, password = (credentials[key] for key in ("app", "email", "password"))
     url = "https://{0}.harvestapp.com".format(app)
@@ -33,7 +34,7 @@ def main(client):
     Read Harvest credentials and pull down Harvest data
     """
     # Primary objects
-    # Notice that invoices is missing...
+    print("main", file=sys.stderr)
     mapping_fns = [
         ("clients.json", client.clients),
         ("projects.json", client.projects),
@@ -95,6 +96,7 @@ def main(client):
 
 
 def json_to_csv():
+    print("json_to_csv", file=sys.stderr)
     for json_filename in glob("*.json"):
         csv_filename = os.path.splitext(json_filename)[0] + ".csv"
         print("{0} {1} -> {2}".format("-" * 30, json_filename, csv_filename), file=sys.stderr)
@@ -130,6 +132,9 @@ def json_to_csv():
 
 
 if __name__ == '__main__':
-    client = get_client()
-    main(client)
-    json_to_csv()
+    try:
+        client = get_client()
+        main(client)
+        json_to_csv()
+    except Exception as exc:
+        print(exc)
