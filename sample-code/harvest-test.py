@@ -127,8 +127,13 @@ def json_to_csv():
 
         # Read the JSON
         with open(json_filename, "r") as handle:
-            data = simplejson.loads(handle.read())
-        logger.info("{0} JSON records".format(len(data)))
+            raw_data = handle.read()
+            if not raw_data:
+                logger.info(msg="{0} is empty".format(json_filename))
+                continue
+            else:
+                data = simplejson.loads(raw_data)
+                logger.info(msg="{0} JSON records".format(len(data)))
 
         # Write the CSV
         with open(csv_filename, "w") as handle:
