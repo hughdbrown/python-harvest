@@ -2,30 +2,37 @@
 from __future__ import print_function
 
 import sys
-import os.path
+import os
+import os.path as op
 from glob import glob
 from csv import DictWriter, QUOTE_ALL
 
 from harvest import Harvest
 import simplejson
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 HARVEST_CREDENTIALS = "~/.harvest"
+LOG_PATH = op.expanduser(op.join("~", "logs"))
+LOG_FILE = op.join(LOG_PATH, "harvest.log")
 
 
 def get_credentials():
     """
     Harvest credentials are stored as a JSON file on the file system
     """
-    full_path = os.path.expanduser(HARVEST_CREDENTIALS)
+    full_path = op.expanduser(HARVEST_CREDENTIALS)
     with open(full_path) as f:
         return simplejson.loads(f.read())
 
 
 def get_client():
-    print("* get_credentials", file=sys.stderr)
     credentials = get_credentials()
     app, email, password = (credentials[key] for key in ("app", "email", "password"))
     url = "https://{0}.harvestapp.com".format(app)
+    logger.info(msg="url is {0}".format(url))
     return Harvest(url, email, password)
 
 
@@ -40,7 +47,6 @@ def main(client):
     """
     Read Harvest credentials and pull down Harvest data
     """
-    print("* main", file=sys.stderr)
     errors = 0
     # Primary objects
     mapping_fns = [
@@ -52,13 +58,13 @@ def main(client):
         ("invoices.json", client.invoices),
     ]
     for filename, fn in mapping_fns:
-        print(filename, file=sys.stderr)
         json = fn()
         if test_json(json):
+            logger.info(filename)
             with open(filename, "w") as handle:
                 handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
         else:
-            print("Authentication failed", file=sys.stderr)
+            logger.error(msg="{0}: Authentication failed".format(filename))
             errors += 1
 
     # Lists of data
@@ -66,13 +72,13 @@ def main(client):
         ("expense_categories.json", client.expense_categories),
     ]
     for filename, list_attr in mapping_lists:
-        print(filename, file=sys.stderr)
         json = list_attr
         if test_json(json):
+            logger.info(filename)
             with open(filename, "w") as handle:
                 handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
         else:
-            print("Authentication failed", file=sys.stderr)
+            logger.error(msg="{0}: Authentication failed".format(filename))
             errors += 1
 
     if errors:
@@ -103,10 +109,10 @@ def main(client):
     ]
 
     for filename, fn, kwargs, ids in mapping_ids:
-        print(filename, file=sys.stderr)
+        logger.info(filename)
         json = []
         for id in ids:
-            print("\t", id, file=sys.stderr)
+            logger.info(msg="{0}".format(id))
             d = fn(id, **kwargs)
             if d:
                 json += d
@@ -115,15 +121,14 @@ def main(client):
     return 0
 
 def json_to_csv():
-    print("* json_to_csv", file=sys.stderr)
     for json_filename in glob("*.json"):
-        csv_filename = os.path.splitext(json_filename)[0] + ".csv"
-        print("{0} {1} -> {2}".format("-" * 30, json_filename, csv_filename), file=sys.stderr)
+        csv_filename = op.splitext(json_filename)[0] + ".csv"
+        logger.info("{0} -> {1}".format(json_filename, csv_filename))
 
         # Read the JSON
         with open(json_filename, "r") as handle:
             data = simplejson.loads(handle.read())
-        print("{0} JSON records".format(len(data)), file=sys.stderr)
+        logger.info("{0} JSON records".format(len(data)))
 
         # Write the CSV
         with open(csv_filename, "w") as handle:
@@ -144,13 +149,28 @@ def json_to_csv():
                     d = {field: d0.get(field) for field in fields}
                     dw.writerow(d)
                     i += 1
-                print("{0} CSV rows".format(i), file=sys.stderr)
+                logger.info("{0} CSV rows".format(i))
             except IndexError:
                 # No rows in JSON
-                print("No data in '{0}'".format(json_filename), file=sys.stderr)
+                logger.error(msg="No data in '{0}'".format(json_filename))
+
+
+def setup_logger():
+    """
+    Set up the logger to write out system actions
+    """
+    logger.setLevel(logging.INFO)
+    if not op.exists(LOG_PATH):
+        os.makedirs(LOG_PATH)
+    formatter = logging.Formatter(fmt="%(asctime)s %(levelname)s %(message)s")
+    handler = logging.FileHandler(LOG_FILE)
+    handler.setFormatter(formatter)
+    handler.setLevel(logging.INFO)
+    logger.addHandler(handler)
 
 
 if __name__ == '__main__':
+    setup_logger()
     try:
         client = get_client()
         errors = main(client)
@@ -158,4 +178,6 @@ if __name__ == '__main__':
             json_to_csv()
         sys.exit(errors)
     except Exception as exc:
-        print(exc)
+        logger.exception(exc)
+    finally:
+        print("See log at: {0}".format(LOG_FILE), file=sys.stderr)
