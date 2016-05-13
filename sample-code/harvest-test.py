@@ -22,19 +22,27 @@ def get_credentials():
 
 
 def get_client():
-    print("get_credentials", file=sys.stderr)
+    print("* get_credentials", file=sys.stderr)
     credentials = get_credentials()
     app, email, password = (credentials[key] for key in ("app", "email", "password"))
     url = "https://{0}.harvestapp.com".format(app)
     return Harvest(url, email, password)
 
 
+def test_json(json):
+    """
+    Test for a failed authentication request
+    """
+    return not (type(json) is dict and json.get("message") == "Authentication failed for API request.")
+
+
 def main(client):
     """
     Read Harvest credentials and pull down Harvest data
     """
+    print("* main", file=sys.stderr)
+    errors = 0
     # Primary objects
-    print("main", file=sys.stderr)
     mapping_fns = [
         ("clients.json", client.clients),
         ("projects.json", client.projects),
@@ -46,8 +54,12 @@ def main(client):
     for filename, fn in mapping_fns:
         print(filename, file=sys.stderr)
         json = fn()
-        with open(filename, "w") as handle:
-            handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
+        if test_json(json):
+            with open(filename, "w") as handle:
+                handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
+        else:
+            print("Authentication failed", file=sys.stderr)
+            errors += 1
 
     # Lists of data
     mapping_lists = [
@@ -56,8 +68,15 @@ def main(client):
     for filename, list_attr in mapping_lists:
         print(filename, file=sys.stderr)
         json = list_attr
-        with open(filename, "w") as handle:
-            handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
+        if test_json(json):
+            with open(filename, "w") as handle:
+                handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
+        else:
+            print("Authentication failed", file=sys.stderr)
+            errors += 1
+
+    if errors:
+        return errors
 
     with open("projects.json", "r") as handle:
         projects = simplejson.loads(handle.read())
@@ -93,10 +112,10 @@ def main(client):
                 json += d
         with open(filename, "w") as handle:
             handle.write(simplejson.dumps(json, sort_keys=True, indent="    "))
-
+    return 0
 
 def json_to_csv():
-    print("json_to_csv", file=sys.stderr)
+    print("* json_to_csv", file=sys.stderr)
     for json_filename in glob("*.json"):
         csv_filename = os.path.splitext(json_filename)[0] + ".csv"
         print("{0} {1} -> {2}".format("-" * 30, json_filename, csv_filename), file=sys.stderr)
@@ -134,7 +153,9 @@ def json_to_csv():
 if __name__ == '__main__':
     try:
         client = get_client()
-        main(client)
-        json_to_csv()
+        errors = main(client)
+        if not errors:
+            json_to_csv()
+        sys.exit(errors)
     except Exception as exc:
         print(exc)
