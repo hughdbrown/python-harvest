@@ -69,7 +69,7 @@ def main(client):
 
     # Lists of data
     mapping_lists = [
-        ("expense_categories.json", client.expense_categories),
+        # ("expense_categories.json", client.expense_categories),
     ]
     for filename, list_attr in mapping_lists:
         json = list_attr
