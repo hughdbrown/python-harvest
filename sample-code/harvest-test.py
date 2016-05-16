@@ -14,8 +14,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-HARVEST_CREDENTIALS = "~/.harvest"
-LOG_PATH = op.expanduser(op.join("~", "logs"))
+HARVEST_CREDENTIALS_DEFAULT = "~/.harvest"
+HARVEST_CREDENTIALS = os.environ.get("HARVEST", HARVEST_CREDENTIALS_DEFAULT)
+LOG_PATH_DEFAULT = op.expanduser(op.join("~", "logs"))
+LOG_PATH = os.environ.get("LOG", LOG_PATH_DEFAULT)
 LOG_FILE = op.join(LOG_PATH, "harvest.log")
 
 
