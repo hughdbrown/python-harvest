@@ -95,7 +95,10 @@ def main(client):
         client_ids = [d["client"]["id"] for d in clients]
 
     # Projects and clients (APIs that take IDs as arguments)
-    ALL_2016 = {"start_date": "2016-01-01", "end_date": "2016-12-31"}
+    ALL_2016 = {
+        "start_date": "2014-01-01",
+        "end_date": "2016-12-31"
+    }
     mapping_ids = [
         # expenses_for_project(self, project_id, start_date, end_date
         ("expenses_for_project.json", client.expenses_for_project, ALL_2016, project_ids),
