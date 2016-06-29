@@ -5,10 +5,13 @@
  (forked from https://github.com/lionheart/python-harvest.git)
  Date: Sat Jan 31 12:17:16 2015
 """
+from __future__ import print_function
 
+import sys
 import json
 from urlparse import urlparse
 from base64 import b64encode as enc64
+from itertools import count
 
 import requests
 from requests_oauthlib import OAuth2Session
@@ -519,9 +522,7 @@ class Harvest(object):
 
     # Invoices
 
-    def invoices(self, start_date=None, end_date=None,
-                 updated_since=None, client_id=None,
-                 status_enum=None):
+    def invoices(self, **kwargs):
         """
         Get all the invoices, optionally filtered by:
         - start and end dates
@@ -530,17 +531,29 @@ class Harvest(object):
         - updated since date
         http://help.getharvest.com/api/invoices-api/invoices/show-invoices/#show-recently-created-invoices
         """
-        if client_id:
-            params = '?client={0}'.format(client_id)
-        elif start_date or end_date:
-            params = '?from={0}&to={1}'.format(start_date, end_date)
-        elif status_enum:
-            params = '?status={0}'.format(status_enum)
-        elif updated_since:
-            params = '?updated_since={0}'.format(updated_since)
-        else:
-            params = ""
-        return self._get('/invoices{0}'.format(params))
+        # If you do not specify a list of pages to retrieve, it gets all pages.
+        pages = kwargs.pop("pages", count(start=1))
+
+        formats = {
+            'start_date': 'from={0}',
+            'end_date': 'to={0}',
+            'status_enum': 'status={0}',
+            'updated_since': 'updated_since={0}',
+        }
+        formatted_args = "&".join(
+            formats[key].format(value)
+            for key, value in kwargs.items()
+            if value
+        )
+
+        invoices = []
+        for page in pages:
+            url = '/invoices?page={0}{1}'.format(page, formatted_args and ("&" + formatted_args))
+            invoice_set = self._get(url)
+            if not invoice_set:
+                break
+            invoices += invoice_set
+        return invoices
 
     def get_invoice(self, invoice_id):
         """
